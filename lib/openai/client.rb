@@ -61,12 +61,21 @@ module OpenAI
     end
 
     def self.json_post(path:, parameters:)
-      Typhoeus.post(
+      request = Typhoeus::Request.new(
         uri(path: path),
+        method: :post,
         headers: headers,
         body: parameters&.to_json,
         timeout: request_timeout
       )
+
+      # TODO: need a better interface, right now just testing this out so the client is responsible to call `.run`
+      # after setting the appropriate callbacks.
+      if parameters[:stream]
+        request
+      else
+        request.run
+      end
     end
 
     def self.multipart_post(path:, parameters: nil)
